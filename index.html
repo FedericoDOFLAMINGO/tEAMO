@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para ti, mi niña</title>
+<style>
+  :root{
+    --morado: #5c3a6e;
+    --morado2: #8a6aa3;
+    --cafe: #7b5233;
+    --cafe2: #c9a06a;
+    --fondo1: #f6ede1;
+    --fondo2: #e9dcf0;
+    --texto: #4a2f45;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;min-height:100%;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(160deg, var(--fondo1), var(--fondo2));
+    color: var(--texto);
+    overflow-x:hidden;
+  }
+  #hearts-bg{
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .bgheart{
+    position:absolute; bottom:-40px; opacity:0.5;
+    font-size:20px; color: var(--morado2);
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.6; }
+    100%{ transform: translateY(-110vh) rotate(360deg); opacity:0; }
+  }
+
+  /* Envelope */
+  #envelope-screen{
+    position:fixed; inset:0; z-index:10;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle at 50% 40%, #efe2d8, #e4d5ee);
+    transition: opacity 0.8s ease, visibility 0.8s;
+  }
+  #envelope-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  .envelope{
+    width:260px; height:170px; position:relative; cursor:pointer;
+  }
+  .env-back{
+    position:absolute; inset:0;
+    background: linear-gradient(135deg, var(--morado2), var(--cafe2));
+    border-radius:8px;
+    box-shadow: 0 10px 30px rgba(92,58,110,0.3);
+  }
+  .env-flap{
+    position:absolute; top:0; left:0; width:100%; height:0;
+    border-left:130px solid transparent;
+    border-right:130px solid transparent;
+    border-top:90px solid #e3cba0;
+    transform-origin:top;
+    transition: transform 0.7s ease;
+    z-index:3;
+  }
+  .envelope.open .env-flap{ transform: rotateX(180deg); }
+  .env-seal{
+    position:absolute; top:78px; left:50%; transform:translateX(-50%);
+    width:46px;height:46px;border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--cafe2), #6b4423);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff8ea; font-size:20px; z-index:5;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+    animation: pulseSeal 2.2s ease-in-out infinite;
+  }
+  @keyframes pulseSeal{ 0%,100%{transform:translateX(-50%) scale(1);} 50%{transform:translateX(-50%) scale(1.08);} }
+  .envelope.open .env-seal{ animation:none; opacity:0; transition:opacity 0.3s; }
+  #envelope-caption{
+    text-align:center; margin-top:26px; color: var(--morado); font-size:16px; letter-spacing:0.5px;
+  }
+  #envelope-wrap{ text-align:center; }
+
+  /* Letter container */
+  #letter{
+    position:relative; z-index:1;
+    max-width:640px; margin:40px auto 80px; padding: 34px 30px 40px;
+    background: rgba(255,251,246,0.88);
+    border-radius:22px;
+    box-shadow: 0 20px 50px rgba(92,58,110,0.2);
+    border: 1px solid rgba(123,82,51,0.35);
+  }
+  #letter h1{
+    text-align:center; color:var(--morado); font-size:26px; margin-bottom:4px;
+    text-shadow: 0 1px 0 #fff;
+  }
+  #letter .subtitle{
+    text-align:center; color:var(--cafe); font-size:14px; margin-bottom:30px; letter-spacing:1px;
+  }
+  .bloque{
+    opacity:0; transform: translateY(14px);
+    max-height:0; overflow:hidden;
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .bloque.show{ opacity:1; transform:translateY(0); max-height:none; }
+  .parrafo{
+    font-size:16.5px; line-height:1.75; margin:0 0 6px;
+  }
+  .mini-heart{
+    cursor:pointer; color:var(--cafe2); font-size:15px; padding:0 2px;
+    transition: transform 0.2s;
+  }
+  .mini-heart:hover{ transform: scale(1.3); }
+
+  .entre-corazon{
+    text-align:center; margin: 6px 0 22px;
+    font-size:26px; color: var(--cafe2); cursor:pointer;
+    transition: transform 0.25s ease, color 0.25s ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  }
+  .entre-corazon:hover{ transform: scale(1.2); color: var(--morado); }
+  .entre-nota{
+    text-align:center; font-size:13.5px; color: var(--morado); font-style:italic;
+    max-height:0; opacity:0; overflow:hidden; transition: all 0.4s ease; margin:-14px 0 18px;
+  }
+  .entre-nota.show{ max-height:60px; opacity:1; }
+
+  #seguir-btn{
+    display:block; margin:10px auto 0; padding:10px 26px;
+    background: linear-gradient(135deg, var(--morado2), var(--morado));
+    border:none; border-radius:30px; color:#fff8ea; font-size:15px;
+    cursor:pointer; box-shadow:0 6px 16px rgba(92,58,110,0.35);
+    font-family:inherit; letter-spacing:0.5px;
+  }
+  #seguir-btn:active{ transform: scale(0.96); }
+
+  #firma{
+    display:none; text-align:right; margin-top:26px; font-style:italic; color:var(--morado); font-size:16px;
+  }
+
+  /* corona de corazones */
+  #corona{
+    display:none; margin-top:34px; text-align:center;
+  }
+  #corona-titulo{ color:var(--morado); font-size:14px; margin-bottom:14px; letter-spacing:0.5px; }
+  #corona-fan{
+    position:relative; height:90px; display:flex; justify-content:center; align-items:flex-end; gap:2px;
+  }
+  .corona-heart{
+    font-size:26px; cursor:pointer; color:var(--cafe2);
+    transition: transform 0.25s ease, color 0.25s ease;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+  }
+  .corona-heart:hover{ transform: translateY(-8px) scale(1.15); color: var(--morado); }
+
+  /* modal notitas */
+  #nota-modal{
+    position:fixed; inset:0; background:rgba(60,40,70,0.45);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  #nota-modal.show{ display:flex; }
+  #nota-card{
+    background:#fffaf4; border-radius:18px; max-width:340px; padding:26px 24px;
+    text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.25);
+    border:1px solid var(--cafe2);
+    animation: popIn 0.35s ease;
+  }
+  @keyframes popIn{ from{ transform:scale(0.85); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  #nota-texto{ color:var(--morado); font-size:16px; line-height:1.6; margin-bottom:16px; }
+  #nota-close{
+    background:var(--morado2); border:none; color:#fff; padding:8px 20px; border-radius:20px;
+    cursor:pointer; font-family:inherit;
+  }
+
+  #final-heart-wrap{ text-align:center; margin-top:36px; display:none; }
+  #final-heart{
+    font-size:44px; color:var(--morado2); cursor:pointer; display:inline-block;
+    animation: beat 1.6s ease-in-out infinite;
+  }
+  @keyframes beat{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+  #final-msg{
+    margin-top:14px; color:var(--morado); font-size:15px; min-height:20px; font-style:italic;
+  }
+
+  /* Pantalla de bienvenida */
+  #welcome-screen{
+    position:fixed; inset:0; z-index:20;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    background: linear-gradient(160deg, var(--morado), var(--cafe));
+    transition: opacity 0.8s ease, visibility 0.8s;
+    padding:20px; text-align:center;
+  }
+  #welcome-screen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  #welcome-title{
+    color:#fff8ea; font-size:24px; margin-bottom:10px; letter-spacing:0.5px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }
+  #welcome-sub{
+    color:#f0e2d6; font-size:14px; margin-bottom:30px; opacity:0.9;
+  }
+  #welcome-btn{
+    padding:12px 30px; border:none; border-radius:30px;
+    background: var(--cafe2); color:#3f2a1a; font-size:15px;
+    font-family:inherit; cursor:pointer; letter-spacing:0.5px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+  #welcome-btn:active{ transform:scale(0.96); }
+  #mute-btn{
+    position:fixed; top:14px; right:14px; z-index:30;
+    background:rgba(255,255,255,0.85); border:1px solid var(--cafe2);
+    color:var(--morado); border-radius:50%; width:38px; height:38px;
+    font-size:16px; cursor:pointer;
+  }
+
+  /* notitas colgantes (fotos + video), debajo del corazón final */
+  #colgado-wrap{
+    max-height:0; opacity:0; overflow:hidden;
+    transition: max-height 0.8s ease, opacity 0.8s ease;
+    margin-top:0;
+  }
+  #colgado-wrap.show{
+    max-height:900px; opacity:1; margin-top:28px;
+  }
+  #colgado-titulo{
+    color:var(--morado); font-size:14px; margin-bottom:22px; letter-spacing:0.5px; font-style:italic;
+  }
+  #colgado-notas{
+    display:flex; flex-wrap:wrap; gap:36px; justify-content:center; padding:10px 4px 20px;
+  }
+  .colgado-nota{
+    background:#fffaf4; padding:10px 10px 16px; border-radius:4px;
+    box-shadow:0 12px 26px rgba(92,58,110,0.28);
+    width:160px; position:relative; animation: swing 4s ease-in-out infinite;
+  }
+  .colgado-nota:nth-child(1){ transform:rotate(-4deg); animation-delay:0s; }
+  .colgado-nota:nth-child(2){ transform:rotate(3deg); animation-delay:0.3s; }
+  .colgado-nota:nth-child(3){ transform:rotate(-2deg); animation-delay:0.6s; }
+  @keyframes swing{
+    0%,100%{ margin-top:0; }
+    50%{ margin-top:6px; }
+  }
+  .colgado-nota .cinta{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%) rotate(-3deg);
+    width:44px; height:18px; background:rgba(201,160,106,0.85);
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+  }
+  .colgado-nota img, .colgado-nota video{
+    width:100%; height:170px; object-fit:cover; display:block; border-radius:2px;
+  }
+</style>
+</head>
+<body>
+
+<div id="hearts-bg"></div>
+
+<audio id="musica" src="all.mp3" loop></audio>
+<button id="mute-btn" onclick="toggleMusica()">🔊</button>
+
+<div id="welcome-screen">
+  <div id="welcome-title">Para ti, mi niña</div>
+  <div id="welcome-sub">tócame para abrir tu carta</div>
+  <button id="welcome-btn" onclick="entrar()">Entrar con amor ♡</button>
+</div>
+
+<div id="envelope-screen">
+  <div id="envelope-wrap">
+    <div class="envelope" id="envelope" onclick="openEnvelope()">
+      <div class="env-back"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal">A+F</div>
+    </div>
+    <div id="envelope-caption">Toca el sobre</div>
+  </div>
+</div>
+
+<div id="letter">
+  <h1>Mi corazón, Mi eterno Amor</h1>
+  <div class="subtitle">Que cada momento se sienta tan único y verdadero, que tu Corazón siempre se sienta amada y en el lugar correcto</div>
+
+  <div class="bloque" data-p="1">
+    <p class="parrafo">Mi niña; Quiero decirte que gracias por apoyarme <span class="mini-heart" onclick="mostrarNota(0)">♡</span>, por cada momento a mi lado y por cada vez que haces sentir amado a mi corazón y mi ser.</p>
+    <div class="entre-corazon" onclick="tocaEntre(this,0)">♥</div>
+    <div class="entre-nota"></div>
+  </div>
+
+  <div class="bloque" data-p="2">
+    <p class="parrafo">Quiero que sepas que te quiero de verdad, mi amor. Te quiero por todo lo que eres, por cada parte de ti, por tus formas de ser, por tus detalles <span class="mini-heart" onclick="mostrarNota(1)">♡</span>, por tu manera de quererme y por todo lo que eres al completo, todo de ti es maravilloso, único y especial para mí.</p>
+    <div class="entre-corazon" onclick="tocaEntre(this,1)">♥</div>
+    <div class="entre-nota"></div>
+  </div>
+
+  <div class="bloque" data-p="3">
+    <p class="parrafo">Y quiero darte eternamente las gracias por todo lo que has sido y serás para mí, por todo lo que haces por mí y también por todo eso que ves en mí. Gracias <span class="mini-heart" onclick="mostrarNota(2)">♡</span>por cada momento de felicidad y cada vez que haces mi corazón latir.</p>
+    <div class="entre-corazon" onclick="tocaEntre(this,2)">♥</div>
+    <div class="entre-nota"></div>
+  </div>
+
+  <div class="bloque" data-p="4">
+    <p class="parrafo">Gracias por querer mi corazón con tanto cariño y por hacerme sentir que puedo ser yo contigo. No sabes cuánto valoro tenerte en mi vida y poder compartir contigo cada pequeño momento.</p>
+    <div class="entre-corazon" onclick="tocaEntre(this,3)">♥</div>
+    <div class="entre-nota"></div>
+  </div>
+
+  <div class="bloque" data-p="5">
+    <p class="parrafo">Te quiero muchísimo, mi niña. Te quiero desde el primer momento que nuestros caminos se cruzaron, desde el momento en el que vimos el uno al otro, <span class="mini-heart" onclick="mostrarNota(3)">♡</span>. Te AMO todaa.</p>
+    <div class="entre-corazon" onclick="tocaEntre(this,4)">♥</div>
+    <div class="entre-nota"></div>
+  </div>
+
+  <div class="bloque" data-p="6">
+    <p class="parrafo">Gracias por existir, por llegar a mi vida y por quedarte. Te amo, mi amor.</p>
+  </div>
+
+  <button id="seguir-btn" onclick="siguienteParrafo()">seguir leyendo ♡</button>
+
+  <div id="firma">Tu siempre Latoso FER</div>
+
+  <div id="corona">
+    <div id="corona-titulo">un corazón por cada cosa que siento por ti</div>
+    <div id="corona-fan"></div>
+  </div>
+
+  <div id="final-heart-wrap">
+    <div id="final-heart" onclick="tocaFinal()">♥</div>
+    <div id="final-msg">tócame, mi amor</div>
+    <div id="colgado-wrap">
+      <div id="colgado-titulo">un poquito de nosotros</div>
+      <div id="colgado-notas">
+        <div class="colgado-nota"><div class="cinta"></div><img src="all1.jpg" alt=""></div>
+        <div class="colgado-nota"><div class="cinta"></div><video src="all.mp4" autoplay muted loop playsinline></video></div>
+        <div class="colgado-nota"><div class="cinta"></div><img src="all2.jpg" alt=""></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="nota-modal" onclick="cerrarNotaFuera(event)">
+  <div id="nota-card">
+    <div id="nota-texto"></div>
+    <button id="nota-close" onclick="cerrarNota()">cerrar</button>
+  </div>
+</div>
+
+<script>
+// fondo de corazones flotantes
+const bg = document.getElementById('hearts-bg');
+const simbolos = ['♡','♥'];
+for(let i=0;i<22;i++){
+  const h = document.createElement('div');
+  h.className='bgheart';
+  h.textContent = simbolos[Math.floor(Math.random()*simbolos.length)];
+  h.style.left = Math.random()*100+'%';
+  h.style.fontSize = (14+Math.random()*16)+'px';
+  h.style.animationDuration = (9+Math.random()*10)+'s';
+  h.style.animationDelay = (Math.random()*10)+'s';
+  bg.appendChild(h);
+}
+
+function entrar(){
+  const audio = document.getElementById('musica');
+  audio.play().catch(()=>{});
+  document.getElementById('welcome-screen').classList.add('hide');
+}
+function toggleMusica(){
+  const audio = document.getElementById('musica');
+  const btn = document.getElementById('mute-btn');
+  if(audio.paused){ audio.play().catch(()=>{}); btn.textContent='🔊'; }
+  else { audio.pause(); btn.textContent='🔇'; }
+}
+
+function openEnvelope(){
+  const env = document.getElementById('envelope');
+  env.classList.add('open');
+  setTimeout(()=>{
+    document.getElementById('envelope-screen').classList.add('hide');
+  }, 750);
+  setTimeout(()=>{
+    mostrarSiguiente();
+  }, 900);
+}
+
+let paso = 0;
+const bloques = document.querySelectorAll('.bloque');
+function mostrarSiguiente(){
+  if(paso < bloques.length){
+    bloques[paso].classList.add('show');
+    paso++;
+  }
+  if(paso >= bloques.length){
+    document.getElementById('seguir-btn').style.display='none';
+    document.getElementById('firma').style.display='block';
+    document.getElementById('corona').style.display='block';
+    document.getElementById('final-heart-wrap').style.display='block';
+    construirCorona();
+  }
+}
+function siguienteParrafo(){ mostrarSiguiente(); }
+
+// notitas al tocar corazoncitos dentro del texto
+const notas = [
+  "Gracias por creer en cada camino nuevo que se me ocurre, mi niña.",
+  "Amo hasta esos detalles que tú crees que nadie nota.",
+  "Confías en mí incluso cuando yo dudo de mí mismo, y eso me salva.",
+  "Te elegiría siempre, sin condiciones, tal y como eres."
+];
+function mostrarNota(i){
+  document.getElementById('nota-texto').textContent = notas[i];
+  document.getElementById('nota-modal').classList.add('show');
+}
+function cerrarNota(){ document.getElementById('nota-modal').classList.remove('show'); }
+function cerrarNotaFuera(e){ if(e.target.id==='nota-modal') cerrarNota(); }
+
+// corazones entre cada texto
+const fraseEntre = [
+  "un poquito más de mí para ti",
+  "esto también es para ti, mi niña",
+  "cada palabra es de verdad",
+  "sigo pensando en ti",
+  "esto lo siento de verdad"
+];
+function tocaEntre(el, i){
+  const rect = el.getBoundingClientRect();
+  burstHearts(rect.left + rect.width/2, rect.top + rect.height/2);
+  const nota = el.nextElementSibling;
+  if(nota && nota.classList.contains('entre-nota')){
+    if(nota.classList.contains('show')){
+      nota.classList.remove('show');
+    } else {
+      nota.textContent = fraseEntre[i % fraseEntre.length];
+      nota.classList.add('show');
+    }
+  }
+}
+
+// corona de corazones con frases
+const fraseCorona = [
+  "Eres mi lugar favorito para volver.",
+  "Contigo hasta lo difícil se siente más ligero.",
+  "Cada día contigo es una razón nueva para quererte más.",
+  "Tu cariño es lo que más cuido en este mundo.",
+  "No hay versión de ti que yo no ame.",
+  "Gracias por quedarte, siempre."
+];
+function construirCorona(){
+  const fan = document.getElementById('corona-fan');
+  fan.innerHTML='';
+  const total = fraseCorona.length;
+  fraseCorona.forEach((frase, i)=>{
+    const h = document.createElement('span');
+    h.className='corona-heart';
+    h.textContent='♥';
+    const angle = -60 + (120/(total-1))*i;
+    h.style.transform = `rotate(${angle}deg) translateY(0)`;
+    h.style.transformOrigin='bottom center';
+    h.onclick = ()=>{ document.getElementById('nota-texto').textContent = frase; document.getElementById('nota-modal').classList.add('show'); };
+    fan.appendChild(h);
+  });
+}
+
+// explosión de corazones reutilizable
+function burstHearts(x,y){
+  for(let i=0;i<9;i++){
+    const h = document.createElement('div');
+    h.textContent='♥';
+    h.style.position='fixed';
+    h.style.left=x+'px';
+    h.style.top=y+'px';
+    h.style.color = i%2===0 ? '#8a6aa3' : '#c9a06a';
+    h.style.fontSize = (14+Math.random()*12)+'px';
+    h.style.zIndex=60;
+    h.style.pointerEvents='none';
+    document.body.appendChild(h);
+    const angle = Math.random()*Math.PI*2;
+    const dist = 50+Math.random()*70;
+    const dx = Math.cos(angle)*dist;
+    const dy = Math.sin(angle)*dist - 40;
+    h.style.transition='transform 1s ease-out, opacity 1s ease-out';
+    requestAnimationFrame(()=>{
+      h.style.transform = `translate(${dx}px, ${dy}px)`;
+      h.style.opacity='0';
+    });
+    setTimeout(()=>h.remove(), 1100);
+  }
+}
+
+// corazón final
+const finalFrases = [
+  "te amo todaaa, mi niña",
+  "eres todo lo que quiero",
+  "gracias por existir",
+  "te elegiría siempre a ti",
+  "mi corazón siempre fue tuyo"
+];
+function tocaFinal(){
+  const msg = document.getElementById('final-msg');
+  msg.textContent = finalFrases[Math.floor(Math.random()*finalFrases.length)];
+  const rect = document.getElementById('final-heart').getBoundingClientRect();
+  burstHearts(rect.left+rect.width/2, rect.top+rect.height/2);
+  document.getElementById('colgado-wrap').classList.add('show');
+}
+</script>
+</body>
+</html>
